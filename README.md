@@ -44,7 +44,7 @@
      localStorage.getItem('np_webapp_token')
      ```
 
-   - 该命令将返回 Bearer 令牌。**复制令牌**（不包括 `Bearer` 前缀，仅复制字母和数字组合的字符串）。
+   ![image](https://github.com/user-attachments/assets/611bcb91-c3e2-46cb-89f9-27b8963f055c)
 
 3. **将令牌粘贴到 `token.txt` 文件中**：
    - 在项目根目录中创建一个 `token.txt` 文件，并将令牌粘贴到文件中（每行一个令牌）。
