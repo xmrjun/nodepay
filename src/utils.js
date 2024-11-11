@@ -17,7 +17,7 @@ async function readLines(filename) {
 function displayHeader() {
   process.stdout.write('\x1Bc');
   console.log(chalk.yellow('╔════════════════════════════════════════╗'));
-  console.log(chalk.yellow('║      🚀  Nodepay节点机器人  🚀        ║'));
+  console.log(chalk.yellow('║      🚀  Nodepay节点机器人  🚀         ║'));
   console.log(chalk.yellow('║  👤    脚本编写：@qklxsqf              ║'));
   console.log(chalk.yellow('║  📢  电报频道：https://t.me/ksqxszq    ║'));
   console.log(chalk.yellow('╚════════════════════════════════════════╝'));
