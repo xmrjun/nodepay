@@ -14,8 +14,8 @@
 1. 克隆代码仓库：
 
     ```bash
-    git clone https://github.com/dante4rt/nodepay-airdrop-bot.git
-    cd nodepay-airdrop-bot
+    git clone https://github.com/ziqing888/nodepay.git
+    cd nodepay
     ```
 
 2. 安装依赖：
