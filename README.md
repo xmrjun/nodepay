@@ -1,4 +1,4 @@
-# nodepay-airdrop-bot
+# nodepay
 
 一个用于自动化 Nodepay 空投交互的机器人，包括会话管理和带代理支持的 Ping 功能。
 
