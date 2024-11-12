@@ -2,59 +2,79 @@ require('colors');
 const Config = require('./src/config');
 const Bot = require('./src/bot');
 const initLogger = require('./src/logger');
-const { readLines, displayHeader, askAccountType } = require('./src/utils');
+const {
+  readLines,
+  displayHeader,
+  askAccountType,
+  askProxyMode,
+} = require('./src/utils');
 
 async function main() {
   displayHeader();
-  console.log('⏳ 请稍候...\n'.yellow);  // 中文提示：请稍候...
+  console.log('⏳ 请稍候...\n'.yellow);
 
   const config = new Config();
   const logger = initLogger();
 
   const tokens = await readLines('token.txt');
-  const proxies = await readLines('proxy.txt').then((lines) =>
-    lines
-      .map((line) => {
-        const [host, port, username, password] = line.split(':');
-        if (!host || !port) {
-          console.log(`⚠️  ${'proxy.txt 中的代理格式无效'.red}`.yellow);  // 中文提示：代理格式无效
-          return null;
-        }
-        return { host, port, username, password };
-      })
-      .filter(Boolean)
-  );
+  const useProxy = await askProxyMode();
 
-  if (tokens.length > proxies.length) {
-    console.log(`⚠️  ${'令牌数量超过代理数量'.yellow}`);  // 中文提示：令牌数量超过代理数量
-    return;
+  let proxies = [];
+  if (useProxy) {
+    proxies = await readLines('proxy.txt').then((lines) =>
+      lines
+        .map((line) => {
+          const [host, port, username, password] = line.split(':');
+          if (!host || !port) {
+            console.log(
+              `⚠️  ${'proxy.txt 中的代理格式无效'.red}`.yellow
+            );
+            return null;
+          }
+          return { host, port, username, password };
+        })
+        .filter(Boolean)
+    );
+
+    if (tokens.length > proxies.length) {
+      console.log(
+        `⚠️  ${'代理数量不足，无法满足令牌数量'.yellow}`
+      );
+      return;
+    }
   }
 
   const accountType = await askAccountType();
   const bot = new Bot(config, logger);
 
-  if (accountType === 'Single Account') {
+  if (accountType === '单个账户') {
     const singleToken = tokens[0];
 
-    for (const proxy of proxies) {
+    if (useProxy) {
+      for (const proxy of proxies) {
+        bot
+          .connect(singleToken, proxy)
+          .catch((err) => console.log(`❌ ${err.message}`.red));
+      }
+    } else {
       bot
-        .connect(singleToken, proxy)
-        .catch((err) => console.log(`❌ 连接失败：${err.message}`.red));  // 中文错误提示：连接失败
+        .connect(singleToken)
+        .catch((err) => console.log(`❌ ${err.message}`.red));
     }
   } else {
     for (let i = 0; i < tokens.length; i++) {
       const token = tokens[i];
-      const proxy = proxies[i];
+      const proxy = useProxy ? proxies[i] : null;
       bot
         .connect(token, proxy)
-        .catch((err) => console.log(`❌ 连接失败：${err.message}`.red));  // 中文错误提示：连接失败
+        .catch((err) => console.log(`❌ ${err.message}`.red));
     }
   }
 
   process.on('SIGINT', () => {
-    console.log(`\n👋 ${'正在关闭...'.green}`);  // 中文提示：正在关闭...
+    console.log(`\n👋 ${'正在关闭...'.green}`);
     process.exit(0);
   });
 }
 
-main().catch((error) => console.log(`❌ 程序错误：${error.message}`.red));  // 中文错误提示：程序错误
+main().catch((error) => console.log(`❌ ${error.message}`.red));
