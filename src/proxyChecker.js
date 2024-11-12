@@ -20,7 +20,7 @@ class ProxyChecker {
       this.ipCache.cacheIP(proxy, ipInfo);
       return ipInfo;
     } catch (error) {
-      throw new Error('代理IP检查失败'); // 输出中文化
+      throw new Error('代理 IP 检查失败');
     }
   }
 
@@ -39,3 +39,5 @@ class ProxyChecker {
 }
 
 module.exports = ProxyChecker;
+
+
