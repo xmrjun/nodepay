@@ -9,17 +9,18 @@ class Bot {
     this.proxyCheck = new ProxyChecker(config, logger);
   }
 
-  async connect(token, proxy) {
+  async connect(token, proxy = null) {
     try {
       const userAgent = 'Mozilla/5.0 ... Safari/537.3';
       const accountInfo = await this.getSession(token, userAgent, proxy);
 
       console.log(
-        `✅ ${'已连接到会话'.green}，用户ID: ${accountInfo.uid}`
-      );  // 输出连接成功信息
+        `✅ ${'已连接到会话'.green}，UID: ${accountInfo.uid}`
+      );
       this.logger.info('会话信息', {
         uid: accountInfo.uid,
         name: accountInfo.name,
+        useProxy: !!proxy,
       });
 
       console.log('');
@@ -28,36 +29,37 @@ class Bot {
         try {
           await this.sendPing(accountInfo, token, userAgent, proxy);
         } catch (error) {
-          console.log(`❌ ${'Ping 错误'.red}: ${error.message}`);  // 输出 Ping 错误信息
+          console.log(`❌ ${'Ping 错误'.red}：${error.message}`);
           this.logger.error('Ping 错误', { error: error.message });
         }
       }, this.config.retryInterval);
 
       process.on('SIGINT', () => clearInterval(interval));
     } catch (error) {
-      console.log(`❌ ${'连接错误'.red}: ${error.message}`);  // 输出连接错误信息
+      console.log(`❌ ${'连接错误'.red}：${error.message}`);
       this.logger.error('连接错误', { error: error.message, proxy });
     }
   }
 
   async getSession(token, userAgent, proxy) {
     try {
-      const response = await axios.post(
-        this.config.sessionURL,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-            'User-Agent': userAgent,
-            Accept: 'application/json',
-          },
-          proxy: this.buildProxyConfig(proxy),
-        }
-      );
+      const config = {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'User-Agent': userAgent,
+          Accept: 'application/json',
+        },
+      };
+
+      if (proxy) {
+        config.proxy = this.buildProxyConfig(proxy);
+      }
+
+      const response = await axios.post(this.config.sessionURL, {}, config);
       return response.data.data;
     } catch (error) {
-      throw new Error('会话请求失败');  // 输出会话请求失败信息
+      throw new Error('会话请求失败');
     }
   }
 
@@ -74,23 +76,28 @@ class Bot {
     };
 
     try {
-      await axios.post(this.config.pingURL, pingData, {
+      const config = {
         headers: {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json',
           'User-Agent': userAgent,
           Accept: 'application/json',
         },
-        proxy: this.buildProxyConfig(proxy),
-      });
-      console.log(`📡 ${'Ping 已发送'.cyan}，用户ID: ${uid}`);  // 输出 Ping 发送成功信息
+      };
+
+      if (proxy) {
+        config.proxy = this.buildProxyConfig(proxy);
+      }
+
+      await axios.post(this.config.pingURL, pingData, config);
+      console.log(`📡 ${'Ping 已发送'.cyan}，UID: ${uid}`);
       this.logger.info('Ping 已发送', {
         uid,
         browserId,
-        ip: proxy ? proxy.host : '未知',
+        ip: proxy ? proxy.host : '直连',
       });
     } catch (error) {
-      throw new Error('Ping 请求失败');  // 输出 Ping 请求失败信息
+      throw new Error('Ping 请求失败');
     }
   }
 
