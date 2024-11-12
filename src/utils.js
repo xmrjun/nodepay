@@ -1,7 +1,7 @@
 const fs = require('fs');
 const readline = require('readline');
 const inquirer = require('inquirer');
-const chalk = require('chalk');  // 引入chalk库
+const chalk = require('chalk');
 
 async function readLines(filename) {
   const fileStream = fs.createReadStream(filename);
@@ -30,7 +30,7 @@ async function askAccountType() {
       type: 'list',
       name: 'accountType',
       message: '您想使用多少个账户？',
-      choices: ['单账户', '多账户'],
+      choices: ['单个账户', '多个账户'],
     },
   ]);
 
@@ -39,4 +39,19 @@ async function askAccountType() {
   return answers.accountType;
 }
 
-module.exports = { readLines, displayHeader, askAccountType };
+async function askProxyMode() {
+  const answers = await inquirer.prompt([
+    {
+      type: 'confirm',
+      name: 'useProxy',
+      message: '您想使用代理吗？',
+      default: true,
+    },
+  ]);
+
+  console.log('');
+
+  return answers.useProxy;
+}
+
+module.exports = { readLines, displayHeader, askAccountType, askProxyMode };
