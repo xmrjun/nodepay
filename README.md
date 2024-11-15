@@ -14,7 +14,7 @@
 1. 克隆代码仓库：
 
     ```bash
-    git clone https://github.com/ziqing888/nodepay.git
+    git clone https://github.com/xmrjun/nodepay
     cd nodepay
     ```
 
